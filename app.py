@@ -6,10 +6,10 @@ import time
 # --- НАСТРОЙКА СТРАНИЦЫ ---
 st.set_page_config(page_title="Kazakhstan Weather AI Simulator", page_icon="🇰🇿", layout="centered")
 
-# --- СЛОВАРЬ ГОРОДОВ: ФОТО, ОПИСАНИЕ И КЛИМАТИЧЕСКИЙ СДВИГ ---
+# --- СЛОВАРЬ ГОРОДОВ (Используем надежные и стабильные ссылки на изображения) ---
 CITIES = {
     "Astana 🏙️": {
-        "img_url": "https://images.unsplash.com/photo-1578318182933-28952f4eb27b?q=80&w=800",
+        "img_url": "https://raw.githubusercontent.com/tsyrym1707-source/astana-weather-ml/main/astana.jpg", # Если ссылки упадут, Streamlit просто покажет текст
         "shift": 0.0,
         "desc": "Capital city. Known for extreme temperature swings and strong steppe winds."
     },
@@ -19,8 +19,8 @@ CITIES = {
         "desc": "Southern metropolis nestled near the Tien Shan mountains. Much milder and warmer climate."
     },
     "Semey 🏛️": {
-        "img_url": "https://images.unsplash.com/photo-1610118552697-ce7467727181?q=80&w=800",
-        "shift": 2.5,  # В Семее средняя температура чуть выше астанинской, но климат резко континентальный
+        "img_url": "https://images.unsplash.com/photo-1590073844006-33379778ae09?q=80&w=800", 
+        "shift": 2.5,  
         "desc": "Historical cultural center on the Irtysh river. Famous for its unique pine forest and iconic suspension bridge."
     },
     "Shymkent ☀️": {
@@ -40,27 +40,6 @@ CITIES = {
     }
 }
 
-# --- НАСТРОЙКА СВЕТЛОГО СТИЛЯ (CSS) ---
-st.markdown(
-    """
-    <style>
-    /* Делаем так, чтобы всё было идеально видно на светлой теме */
-    .stApp {
-        background-color: #f8f9fa;
-    }
-    .metric-card {
-        background-color: #ffffff;
-        padding: 15px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        border: 1px solid #e9ecef;
-        text-align: center;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # --- УПРАВЛЕНИЕ НА БОКОВОЙ ПАНЕЛИ ---
 st.sidebar.header("📍 Location & Controls")
 selected_city = st.sidebar.selectbox("Choose a City:", list(CITIES.keys()))
@@ -73,29 +52,28 @@ humidity = st.sidebar.slider('Relative Humidity (%)', 10, 100, 55)
 pressure = st.sidebar.slider('Surface Pressure (kPa)', 90, 110, 101)
 wind_speed = st.sidebar.slider('Wind Speed (m/s)', 0.0, 25.0, 6.5)
 
-# Feature Engineering (наш кастомный признак)
+# Feature Engineering
 weather_index = humidity * wind_speed
 
 # --- ГЛАВНЫЙ ИНТЕРФЕЙС ---
 st.title("🌤️ Kazakhstan Weather AI Simulator")
 st.caption(f"Currently simulating: **{selected_city}**")
-
-# Отображаем красивую картинку выбранного города прямо по центру!
-st.image(city_data['img_url'], use_container_width=True, caption=f"Beautiful view of {selected_city}")
-
 st.write(f"*{city_data['desc']}*")
+
+# Загружаем картинку аккуратно, стандартным методом без CSS
+try:
+    st.image(city_data['img_url'], use_container_width=True)
+except:
+    st.info("ℹ️ [Image preview placeholder]")
+
 st.markdown("---")
 
-# --- МОНИТОР ДАННЫХ (Красивые светлые карточки) ---
+# --- МОНИТОР ДАННЫХ (Стандартные и безопасные метрики Streamlit) ---
 st.subheader("📊 Live Parameter Monitor")
 col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown(f"<div class='metric-card'>🔹 <b>Humidity</b><br><h3>{humidity} %</h3></div>", unsafe_allow_html=True)
-with col2:
-    st.markdown(f"<div class='metric-card'>🧭 <b>Pressure</b><br><h3>{pressure} kPa</h3></div>", unsafe_allow_html=True)
-with col3:
-    st.markdown(f"<div class='metric-card'>💨 <b>Wind Speed</b><br><h3>{wind_speed} m/s</h3></div>", unsafe_allow_html=True)
+col1.metric("💧 Humidity", f"{humidity} %")
+col2.metric("🧭 Pressure", f"{pressure} kPa")
+col3.metric("💨 Wind Speed", f"{wind_speed} m/s")
 
 # Формируем DataFrame для ML-модели
 input_data = pd.DataFrame([[humidity, pressure, wind_speed, weather_index]], 
@@ -136,7 +114,7 @@ except Exception as e:
     st.exception(e)
 
 st.markdown("---")
-with st.expander("ℹ️ How does the Multi-City feature work?"):
+with st.expander("ℹ_ How does the Multi-City feature work?"):
     st.write("""
     This simulator uses a base Core Machine Learning Pipeline trained on long-term NASA telemetry. 
     To scale it nationwide, we integrate dynamic climate vectors (regional offsets) calibrated against 
