@@ -68,7 +68,7 @@ st.markdown(
     }}
     </style>
     """,
-    unsafe_filter_html=True
+    unsafe_allow_html=True
 )
 
 # --- ГЛАВНЫЙ ИНТЕРФЕЙС ---
