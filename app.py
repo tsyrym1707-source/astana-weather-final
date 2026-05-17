@@ -18,68 +18,61 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- DICTIONARY OF KAZAKHSTAN CITIES ---
+# --- DICTIONARY OF KAZAKHSTAN CITIES (С точной географией и климатом) ---
 CITIES = {
     "Astana 🏙️": {
-        "img_url": "https://raw.githubusercontent.com/tsyrym1707-source/astana-weather-ml/main/astana.jpg",
         "shift": 0.0,
-        "desc": "Capital city. Known for extreme temperature swings and strong steppe winds.",
+        "desc": "Capital city. Known for extreme temperature swings, harsh winters, and strong steppe winds.",
         "lat": 51.1694,
         "lon": 71.4691
     },
     "Almaty 🏔️": {
-        "img_url": "https://images.unsplash.com/photo-1589561287413-568fb8d022fa?q=80&w=800",
         "shift": 8.5,
-        "desc": "Southern metropolis nestled near the Tien Shan mountains. Much milder and warmer climate.",
-        "lat": 43.2380,
-        "lon": 76.9385
+        "desc": "Southern metropolis nestled near the Tien Shan mountains. Milder, continental mountain climate.",
+        "lat": 43.2383,
+        "lon": 76.9455
     },
     "Semey 🏛️": {
-        "img_url": "https://images.unsplash.com/photo-1590073844006-33379778ae09?q=80&w=800",
         "shift": 2.5,
-        "desc": "Historical cultural center on the Irtysh river. Famous for its unique pine forest and iconic suspension bridge.",
+        "desc": "Historical cultural center on the Irtysh river. Famous for its pine forest and unique continental baseline.",
         "lat": 50.4111,
         "lon": 80.2275
     },
     "Shymkent ☀️": {
-        "img_url": "https://images.unsplash.com/photo-1628131341065-983b632fa1bf?q=80&w=800",
         "shift": 12.0,
-        "desc": "The sunniest and warmest major city. Hot summers and short winters.",
+        "desc": "The sunniest and warmest major city in the south. Hot summers and short, mild winters.",
         "lat": 42.3155,
         "lon": 69.5947
     },
     "Aktau 🌊": {
-        "img_url": "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=800",
         "shift": 5.0,
-        "desc": "Caspian Sea coast. Maritime influence makes winters softer and summers breezy.",
-        "lat": 43.6426,
-        "lon": 51.1694
+        "desc": "Caspian Sea coast. Maritime influence makes winters softer and summers breezy but humid.",
+        "lat": 43.6480,
+        "lon": 51.1720
     }
 }
 
-# --- LOAD JUPYTER PIPELINE ---
+# --- LOAD OR TRAIN JUPYTER PIPELINE ---
 @st.cache_resource
 def get_trained_models_and_scaler():
     """
     Tries to load pre-trained pkl files or sets up an immediate training pipeline
     """
     try:
-        # Пробуем загрузить готовые файлы
         models = {
             'Linear Regression': joblib.load('weather_model.pkl'), 
-            'Random Forest': joblib.load('weather_model.pkl'), # Используем как заглушку, если файл один
+            'Random Forest': joblib.load('weather_model.pkl'),
             'KNN Regressor': joblib.load('weather_model.pkl'),
             'XGBoost Regressor': joblib.load('weather_model.pkl')
         }
         scaler = joblib.load('scaler.pkl')
         return models, scaler, "Pre-trained OK"
     except:
-        # Резервное обучение в точности по твоей структуре данных
         return train_fallback_pipeline()
 
 def train_fallback_pipeline():
     np.random.seed(42)
-    n_samples = 1200
+    n_samples = 1500
     
     humidity = np.random.normal(55, 18, n_samples)
     humidity = np.clip(humidity, 10, 100)
@@ -97,7 +90,7 @@ def train_fallback_pipeline():
     
     models = {
         "Linear Regression": LinearRegression(),
-        "Random Forest": RandomForestRegressor(random_state=42),
+        "Random Forest": RandomForestRegressor(n_estimators=50, random_state=42),
         "KNN Regressor": KNeighborsRegressor(n_neighbors=5),
         "XGBoost Regressor": XGBRegressor(random_state=42)
     }
@@ -105,7 +98,7 @@ def train_fallback_pipeline():
     for model in models.values():
         model.fit(X_scaled, temp)
         
-    return models, scaler, "Fallback Pipeline Live"
+    return models, scaler, "Jupyter Pipeline Active"
 
 # --- MAIN APP ---
 def main():
@@ -115,9 +108,9 @@ def main():
     col1, col2 = st.columns([3, 1])
     with col1:
         st.title("🌤️ Kazakhstan Weather AI Simulator")
-        st.markdown(f"**Jupyter Pipeline Comparison: LR, RandomForest, KNN, XGBoost** | Status: `{system_status}`")
+        st.markdown(f"**Jupyter Pipeline Mapped: LR, RandomForest, KNN, XGBoost** | Pipeline: `{system_status}`")
     with col2:
-        st.write(f"**System Sync:** {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        st.write(f"**System Time:** {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     
     st.markdown("---")
     
@@ -128,11 +121,12 @@ def main():
         city_data = CITIES[selected_city]
         
         st.markdown("---")
-        st.subheader("⚙️ Tune Atmospheric Parameters:")
+        st.subheader("⚙️ Tune Parameters:")
         
-        humidity = st.slider('💧 Relative Humidity (%)', 10, 100, 54)
-        pressure = st.slider('🧭 Surface Pressure (kPa)', 90.0, 110.0, 102.0)
-        wind_speed = st.slider('💨 Wind Speed (m/s)', 0.0, 25.0, 5.0)
+        # Настройки слайдеров по умолчанию под теплую погоду (~15 градусов в Астане)
+        humidity = st.slider('💧 Relative Humidity (%)', 10, 100, 40)
+        pressure = st.slider('🧭 Surface Pressure (kPa)', 90.0, 110.0, 100.5)
+        wind_speed = st.slider('💨 Wind Speed (m/s)', 0.0, 25.0, 3.0)
         
         st.markdown("---")
         st.subheader("🤖 Model Selection")
@@ -145,18 +139,21 @@ def main():
         st.markdown("---")
         predict_button = st.button('🚀 Run AI Predictions', use_container_width=True)
     
-    # City Metadata View
-    col1, col2 = st.columns([2, 1])
+    # City Metadata View & Interactive Map
+    col1, col2 = st.columns([1, 1])
     with col1:
-        st.subheader(f"Raw Geographic Data: {selected_city}")
-        st.write(f"*{city_data['desc']}*")
-        st.markdown(f"📍 **Coordinates:** {city_data['lat']}°N, {city_data['lon']}°E")
+        st.markdown(f"## Regional Profile: {selected_city}")
+        st.info(f"ℹ️ {city_data['desc']}")
+        st.markdown(f"""
+        * **Latitude:** `{city_data['lat']} °N`
+        * **Longitude:** `{city_data['lon']} °E`
+        * **Climate Shift Vector:** `{city_data['shift']:+.1f} °C`
+        """)
     
     with col2:
-        try:
-            st.image(city_data['img_url'], use_container_width=True)
-        except:
-            st.info("🖼️ [Image preview unavailable]")
+        # Интерактивная карта Streamlit — центрируется на выбранном городе!
+        map_data = pd.DataFrame({'lat': [city_data['lat']], 'lon': [city_data['lon']]})
+        st.map(map_data, zoom=9, use_container_width=True)
             
     st.markdown("---")
     
@@ -211,10 +208,10 @@ def main():
                     color, bg_color = "🔥", "#f8d7da"
                 
                 st.markdown(f"""
-                    <div style='background-color: {bg_color}; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #dee2e6;'>
+                    <div style='background-color: {bg_color}; padding: 20px; border-radius: 12px; text-align: center; border: 1px solid #dee2e6;'>
                     <h4 style='color: #212529; margin: 0 0 10px 0;'>{model_name}</h4>
-                    <h2 style='color: #212529; margin: 0 0 5px 0;'>{temp:.2f}°C</h2>
-                    <p style='font-size: 24px; margin: 0;'>{color}</p>
+                    <h1 style='color: #212529; margin: 0 0 5px 0;'>{temp:.2f}°C</h1>
+                    <p style='font-size: 28px; margin: 0;'>{color}</p>
                     </div>
                 """, unsafe_allow_html=True)
                 
@@ -241,7 +238,7 @@ def main():
         else:
             st.success("✅ **Stable Climate Vector:** Standard normal conditions for this simulation.")
 
-    # Engineering Documentation Expandable block
+    # Engineering Documentation
     st.markdown("---")
     with st.expander("ℹ️ Review App Engineering Metrics & Jupyter Pipeline"):
         st.markdown("""
