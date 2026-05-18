@@ -308,9 +308,15 @@ if predict_button:
         textfont=dict(color='white')
     ))
     
-    fig.update_layout(
-        title=dict(text=f"Comparative Forecast Vectors for {selected_city}", font=dict(color='white')),
-        yaxis=dict(title="Predicted Temperature (°C)", gridcolor='rgba(255,255,255,0.1)', tickfont=dict(color='white'), titlefont=dict(color='white')),
+   fig.update_layout(
+        title="Comparative Forecast Vectors for " + selected_city,
+        title_font=dict(color='white'),
+        yaxis=dict(
+            title="Predicted Temperature (°C)", 
+            gridcolor='rgba(255,255,255,0.1)', 
+            tickfont=dict(color='white'), 
+            titlefont=dict(color='white')
+        ),
         xaxis=dict(tickfont=dict(color='white')),
         showlegend=False,
         height=380,
