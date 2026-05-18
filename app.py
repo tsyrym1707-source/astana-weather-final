@@ -8,7 +8,6 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from xgboost import XGBRegressor
 from sklearn.preprocessing import StandardScaler
-import plotly.graph_objects as go
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -279,39 +278,15 @@ if predict_button:
         
     st.markdown("---")
     
-    # --- PLOTLY GRAPH CONFIGURATION ---
-    fig = go.Figure()
-    models_names = ['Random Forest (Best)', 'Linear Regression', 'KNN Regressor', 'XGBoost Regressor']
-    models_temps = [pred_rf, pred_lr, pred_knn, pred_xgb]
-    colors = ['#06A77D', '#2E86AB', '#A23B72', '#F18F01']
-    
-    fig.add_trace(go.Bar(
-        x=models_names,
-        y=models_temps,
-        marker=dict(color=colors, line=dict(color='rgba(0,0,0,0)', width=0)),
-        text=[f'{t:.2f}°C' for t in models_temps],
-        textposition='outside',
-        textfont=dict(color='white')
-    ))
-    
-    fig.update_layout(
-        title="Comparative Forecast Vectors for " + selected_city,
-        title_font=dict(color='white'),
-        yaxis=dict(
-            title="Predicted Temperature (°C)", 
-            gridcolor='rgba(255,255,255,0.1)', 
-            tickfont=dict(color='white'), 
-            titlefont=dict(color='white')
-        ),
-        xaxis=dict(tickfont=dict(color='white')),
-        showlegend=False,
-        height=380,
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        template='plotly_dark'
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
+    # Model Comparison Table instead of Plotly Chart
+    st.subheader("📊 Detailed Model Comparison Matrix")
+    comparison_data = {
+        'Model Architecture': ['Random Forest (Best)', 'Linear Regression', 'KNN Regressor', 'XGBoost Regressor'],
+        'Simulated Prediction (°C)': [f"{pred_rf:.2f}°C", f"{pred_lr:.2f}°C", f"{pred_knn:.2f}°C", f"{pred_xgb:.2f}°C"],
+        'Regional Climate Offset': [f"{city_data['temp_shift']:+.1f}°C" for _ in range(4)],
+        'Base Model Core Output': [f"{pred_rf-city_data['temp_shift']:.2f}°C", f"{pred_lr-city_data['temp_shift']:.2f}°C", f"{pred_knn-city_data['temp_shift']:.2f}°C", f"{pred_xgb-city_data['temp_shift']:.2f}°C"]
+    }
+    st.dataframe(pd.DataFrame(comparison_data), use_container_width=True, hide_index=True)
 
 # System Summary Expandable Section
 st.markdown("---")
@@ -326,7 +301,7 @@ with st.expander("ℹ️ Review Deep Pipeline Architecture Blueprint"):
 # Footer Info Branding
 st.markdown("""
 <div style='text-align: center; color: rgba(255,255,255,0.4); padding: 20px; font-size: 12px;'>
-    <p>Kazakhstan Weather AI Forecaster v3.0 | Astana IT University </p>
-    
+    <p>Kazakhstan Weather AI Forecaster v3.0 | School of Intelligent Systems | Astana IT University</p>
+    <p>© 2026 | Developed as an Interactive Academic Evaluation Framework for Regression Architectures</p>
 </div>
 """, unsafe_allow_html=True)
