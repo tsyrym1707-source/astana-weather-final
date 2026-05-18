@@ -1,4 +1,4 @@
-import streamlit st as st
+import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
@@ -279,7 +279,7 @@ if predict_button:
         
     st.markdown("---")
     
-    # --- PLOTLY GRAPH CONFIGURATION WITH PERFECT PY INDENTATION ---
+    # --- PLOTLY GRAPH CONFIGURATION ---
     fig = go.Figure()
     models_names = ['Random Forest (Best)', 'Linear Regression', 'KNN Regressor', 'XGBoost Regressor']
     models_temps = [pred_rf, pred_lr, pred_knn, pred_xgb]
@@ -326,7 +326,7 @@ with st.expander("ℹ️ Review Deep Pipeline Architecture Blueprint"):
 # Footer Info Branding
 st.markdown("""
 <div style='text-align: center; color: rgba(255,255,255,0.4); padding: 20px; font-size: 12px;'>
-    <p>Kazakhstan Weather AI Forecaster v3.0 | School of Intelligent Systems | Astana IT University</p>
-    <p>© 2026 | Developed as an Interactive Academic Evaluation Framework for Regression Architectures</p>
+    <p>Kazakhstan Weather AI Forecaster v3.0 | Astana IT University </p>
+    
 </div>
 """, unsafe_allow_html=True)
