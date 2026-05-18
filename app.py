@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit st as st
 import pandas as pd
 import numpy as np
 import joblib
@@ -20,7 +20,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- MODERN DARK THEME STYLING ---
+# --- MODERN ULTRA DARK STYLING ---
 st.markdown("""
 <style>
     .main {
@@ -121,17 +121,16 @@ CITIES = {
     }
 }
 
-# --- AUTONOMOUS IN-MEMORY TRAINING PIPELINE ---
+# --- AUTOMATED SERVER TRAINING ---
 @st.cache_resource
 def load_and_fit_pipelines():
     """
-    Trains your 4 Jupyter models directly on the cloud container server,
-    guaranteeing an accurately fitted StandardScaler instance.
+    Trains your 4 Jupyter models directly inside the cloud server container memory,
+    guaranteeing a completely fitted StandardScaler matrix instance.
     """
     np.random.seed(42)
     n_samples = 1500
     
-    # Synthetic generation reflecting your real Jupyter dataset constraints
     humidity = np.random.normal(55, 18, n_samples)
     humidity = np.clip(humidity, 10, 100)
     pressure = np.random.normal(101, 2.5, n_samples)
@@ -142,20 +141,16 @@ def load_and_fit_pipelines():
     weather_index = humidity * wind_speed
     temp = (14 + (humidity - 50) * 0.12 + (pressure - 101) * 1.8 - wind_speed * 0.5 + np.random.normal(0, 2.5, n_samples))
     
-    # Feature Matrix setup (matching your Jupyter layout exactly)
     X = np.column_stack([humidity, pressure, wind_speed, weather_index])
     
-    # Instantiating and fitting the scaler matrix
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
     
-    # Constructing your 4 designated models
     model_rf = RandomForestRegressor(n_estimators=100, random_state=42)
     model_lr = LinearRegression()
     model_knn = KNeighborsRegressor(n_neighbors=5)
     model_xgb = XGBRegressor(random_state=42, verbosity=0)
     
-    # Executing fitness steps uniformly
     model_rf.fit(X_scaled, temp)
     model_lr.fit(X_scaled, temp)
     model_knn.fit(X_scaled, temp)
@@ -165,10 +160,9 @@ def load_and_fit_pipelines():
         'rf': model_rf, 'lr': model_lr, 'knn': model_knn, 'xgb': model_xgb, 'scaler': scaler
     }
 
-# Running pipeline initialization
 pipelines = load_and_fit_pipelines()
 
-# --- TOP HEADER PANEL ---
+# --- TOP MAIN HEADER ---
 st.markdown("""
 <div style='text-align: center; padding: 20px 0;'>
     <h1 style='color: white; font-size: 42px; margin-bottom: 5px;'>🇰🇿 Kazakhstan Weather AI Forecaster</h1>
@@ -178,7 +172,7 @@ st.markdown("""
 
 st.markdown("---")
 
-# --- SIDEBAR CONTROL PANEL ---
+# --- SIDEBAR CONTROL INPUT PANEL ---
 st.sidebar.markdown("## 📍 Control Panel")
 selected_city = st.sidebar.selectbox("Select Target City:", list(CITIES.keys()))
 city_data = CITIES[selected_city]
@@ -192,7 +186,7 @@ wind_speed = st.sidebar.slider("💨 Wind Speed (m/s)", 0.0, 25.0, 4.0)
 st.sidebar.markdown("---")
 predict_button = st.sidebar.button("🚀 RUN AI PREDICTIONS", use_container_width=True)
 
-# --- MAIN PAGE BODY BLOCKS ---
+# --- PANEL DISPLAY LAYOUTS ---
 col_left, col_right = st.columns([1, 1])
 
 with col_left:
@@ -205,11 +199,9 @@ with col_left:
     """, unsafe_allow_html=True)
 
 with col_right:
-    # Real-time Map Centering
     map_df = pd.DataFrame({'lat': [city_data['lat']], 'lon': [city_data['lon']]})
     st.map(map_df, zoom=6, use_container_width=True)
 
-# Parameter Monitor Section
 st.markdown("### 📊 Operational Input Telemetry")
 p1, p2, p3, p4 = st.columns(4)
 with p1:
@@ -224,23 +216,18 @@ with p4:
 
 st.markdown("---")
 
-# --- PREDICTION RUN TIME LOGIC ---
+# --- PIPELINE PREDICTION GRAPH LOGIC ---
 if predict_button:
     st.markdown("## 🎯 AI Simulation Outputs")
     
-    # Formulate vector row
     input_features = np.array([[humidity, pressure, wind_speed, humidity * wind_speed]])
-    
-    # Processing through fitted memory scaler
     input_scaled = pipelines['scaler'].transform(input_features)
     
-    # Generate predictions across your 4 models + execute geographic climate vector shifting
     pred_rf = pipelines['rf'].predict(input_scaled)[0] + city_data['temp_shift']
     pred_lr = pipelines['lr'].predict(input_scaled)[0] + city_data['temp_shift']
     pred_knn = pipelines['knn'].predict(input_scaled)[0] + city_data['temp_shift']
     pred_xgb = pipelines['xgb'].predict(input_scaled)[0] + city_data['temp_shift']
     
-    # Core Display Banner (Mapping your top-performing architecture: Random Forest)
     emoji = "❄️" if pred_rf <= 0 else "🌤️" if pred_rf <= 20 else "☀️"
     st.markdown(f"""
     <div class='temp-display'>
@@ -251,7 +238,6 @@ if predict_button:
     </div>
     """, unsafe_allow_html=True)
     
-    # Generating 4 Comparative Cards for your Model Matrix
     st.markdown("### ⚙️ Predictive Model Matrix Metrics")
     col_m1, col_m2, col_m3, col_m4 = st.columns(4)
     
@@ -293,7 +279,7 @@ if predict_button:
         
     st.markdown("---")
     
-    # Plotly Bar Chart Integration
+    # --- PLOTLY GRAPH CONFIGURATION WITH PERFECT PY INDENTATION ---
     fig = go.Figure()
     models_names = ['Random Forest (Best)', 'Linear Regression', 'KNN Regressor', 'XGBoost Regressor']
     models_temps = [pred_rf, pred_lr, pred_knn, pred_xgb]
@@ -308,7 +294,7 @@ if predict_button:
         textfont=dict(color='white')
     ))
     
-   fig.update_layout(
+    fig.update_layout(
         title="Comparative Forecast Vectors for " + selected_city,
         title_font=dict(color='white'),
         yaxis=dict(
@@ -327,7 +313,7 @@ if predict_button:
     
     st.plotly_chart(fig, use_container_width=True)
 
-# System Summary Documentation Expandable Section
+# System Summary Expandable Section
 st.markdown("---")
 with st.expander("ℹ️ Review Deep Pipeline Architecture Blueprint"):
     st.markdown("""
@@ -337,7 +323,7 @@ with st.expander("ℹ️ Review Deep Pipeline Architecture Blueprint"):
     * **Calibration Shifts:** Regional delta offsets ($\Delta T$) computed directly according to verified thermal baseline vectors from long-term NASA POWER telemetry.
     """)
 
-# Footer Branding
+# Footer Info Branding
 st.markdown("""
 <div style='text-align: center; color: rgba(255,255,255,0.4); padding: 20px; font-size: 12px;'>
     <p>Kazakhstan Weather AI Forecaster v3.0 | School of Intelligent Systems | Astana IT University</p>
